@@ -1,17 +1,41 @@
-from langgraph import Tool
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize, sent_tokenize
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+import re
 
-class SentimentAnalysisTool(Tool):
-    def run(self, state):
-        # Here you would use a sentiment analysis library to analyze the text
-        # For simplicity, we'll just set a dummy sentiment
-        state.sentiment = "positive"
+class DocumentProcessor:
+    def __init__(self):
+        self.stop_words = set(stopwords.words("english"))
+    
+    def __call__(self, document):
+        # Tokenize the document
+        words = word_tokenize(document)
+        
+        # Remove stopwords
+        words = [word for word in words if word not in self.stop_words]
+        
+        return " ".join(words)
 
-class FeedbackTool(Tool):
-    def run(self, state):
-        # Here you would use some kind of feedback mechanism to adjust the sentiment
-        # For simplicity, we'll just flip the sentiment and set the state to stable
-        if state.sentiment == "positive":
-            state.sentiment = "negative"
-        else:
-            state.sentiment = "positive"
-        state.is_stable = True
+class DocumentSummarizer:
+    def __init__(self):
+        self.vectorizer = TfidfVectorizer()
+    
+    def __call__(self, document):
+        # Tokenize the document into sentences
+        sentences = sent_tokenize(document)
+        
+        # Vectorize the sentences
+        tfidf_matrix = self.vectorizer.fit_transform(sentences)
+        
+        # Compute the similarity matrix
+        sim_matrix = cosine_similarity(tfidf_matrix, tfidf_matrix)
+        
+        # Rank the sentences
+        sentence_rank = np.argsort(np.sum(sim_matrix, axis=1))[::-1]
+        
+        # Get the top 3 sentences
+        summary = " ".join([sentences[i] for i in sentence_rank[:3]])
+        
+        return summary

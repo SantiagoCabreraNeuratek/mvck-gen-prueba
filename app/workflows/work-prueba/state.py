@@ -1,6 +1,1 @@
-class SentimentState:
-    def __init__(self):
-        self.text = None
-        self.sentiment = None
-        self.feedback = None
-        self.is_stable = False
+# In this case, we don't need a state.py file because we're not maintaining any state between the nodes.

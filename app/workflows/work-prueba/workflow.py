@@ -1,25 +1,27 @@
-from langgraph import Node, Edge
-from tools import SentimentAnalysisTool, FeedbackTool
-from state import SentimentState
+from langgraph import LangGraph, Node, Edge
+from tools import DocumentProcessor, DocumentSummarizer
 
-class SentimentAnalysisWorkflow:
-    def __init__(self):
-        self.state = SentimentState()
+# Define the nodes
+node1 = Node("DocumentProcessor", DocumentProcessor)
+node2 = Node("DocumentSummarizer", DocumentSummarizer)
 
-        # Define nodes
-        self.sentiment_analysis_node = Node("SentimentAnalysisNode", SentimentAnalysisTool())
-        self.feedback_node = Node("FeedbackNode", FeedbackTool())
+# Define the edges
+edge1 = Edge("DocumentProcessor", "DocumentSummarizer")
 
-        # Define edges
-        self.edge1 = Edge("Edge1", self.sentiment_analysis_node, self.feedback_node)
-        self.edge2 = Edge("Edge2", self.feedback_node, self.sentiment_analysis_node)
+# Create the LangGraph
+lg = LangGraph()
 
-        # Connect nodes
-        self.sentiment_analysis_node.add_edge(self.edge1)
-        self.feedback_node.add_edge(self.edge2)
+# Add the nodes and edges to the LangGraph
+lg.add_node(node1)
+lg.add_node(node2)
+lg.add_edge(edge1)
 
-    def run(self, text):
-        self.state.text = text
-        while not self.state.is_stable:
-            self.sentiment_analysis_node.run(self.state)
-            self.feedback_node.run(self.state)
+# Define the workflow
+def workflow(document):
+    # Process the document
+    processed_doc = lg.run_node("DocumentProcessor", document)
+    
+    # Summarize the processed document
+    summary = lg.run_node("DocumentSummarizer", processed_doc)
+    
+    return summary
