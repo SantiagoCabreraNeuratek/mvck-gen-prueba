@@ -1,17 +1,15 @@
-# agents.py
-from models import Tenant, Contract
+class SentimentState:
+    def __init__(self):
+        self.text = None
+        self.sentiment = None
+        self.previous_sentiment = None
+        self.is_converged = False
 
-class IdentityDocumentAgent:
-    def extract(self, file):
-        # Extract tenant information from identity document
-        pass
+    def update_sentiment(self, sentiment):
+        self.previous_sentiment = self.sentiment
+        self.sentiment = sentiment
+        self.check_convergence()
 
-class IncomeReceiptAgent:
-    def extract(self, file):
-        # Extract income information from income receipt
-        pass
-
-class ContractAgent:
-    def extract(self, file):
-        # Extract contract information from contract document
-        pass
+    def check_convergence(self):
+        if self.previous_sentiment == self.sentiment:
+            self.is_converged = True
